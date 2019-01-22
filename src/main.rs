@@ -19,7 +19,7 @@ fn main() {
     let matches = match opts.parse(args) {
         Ok(m) => m,
         Err(f) => {
-            println!("Failed to parse parameters with: {}", f.to_string());
+            eprintln!("Failed to parse parameters with: {}", f.to_string());
             process::exit(1);
         }
     };
@@ -33,21 +33,21 @@ fn main() {
     let keyword = match matches.opt_str("k") {
         Some(s) => s,
         None => {
-            println!("ERROR: Ciphering keyword must be specified");
+            eprintln!("ERROR: Ciphering keyword must be specified");
             process::exit(1);
         }
     };
     let input_file = match open_input_file(&matches) {
         Ok(f) => f,
         Err(e) => {
-            println!("ERROR: {}", e.to_string());
+            eprintln!("ERROR: {}", e.to_string());
             process::exit(1);
         }
     };
     let output_file = match create_output_file(&matches) {
         Ok(f) => f,
         Err(e) => {
-            println!("ERROR: {}", e.to_string());
+            eprintln!("ERROR: {}", e.to_string());
             process::exit(1);
         }
     };
@@ -63,7 +63,7 @@ fn main() {
     match vigenere::run(config) {
         Ok(_) => process::exit(0),
         Err(f) => {
-            println!("Failed to process cipher with: {}", f);
+            eprintln!("Failed to process cipher with: {}", f);
             process::exit(1);
         },
     };
