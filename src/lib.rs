@@ -1,20 +1,19 @@
-use std::fs::File;
-use std::io::{BufReader, BufRead, BufWriter, Write};
+use std::io::{BufReader, BufRead, BufWriter, Read, Write};
 
-pub struct Config {
+pub struct Config<A: Read, B: Write> {
     pub keyword: String,
-    pub input_file: File,
-    pub output_file: File,
+    pub source: A,
+    pub sink: B,
     pub decipher: bool,
 }
 
-pub fn run(config: Config) -> Result<(), String> {
+pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
     // Create cyclic iterator over keyword characters
     let key = config.keyword.to_ascii_uppercase();
-    let input = BufReader::new(config.input_file);
+    let input = BufReader::new(config.source);
     let do_decipher = config.decipher;
 
-    let mut output = BufWriter::new(config.output_file);
+    let mut output = BufWriter::new(config.sink);
     let mut key_iter = key.as_bytes().into_iter().cycle();
 
     for line in input.lines() {

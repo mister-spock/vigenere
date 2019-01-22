@@ -1,7 +1,6 @@
 use getopts::{Matches, Options};
 use std::fs::File;
-use std::io;
-use std::{env, process};
+use std::{env, io, process};
 use vigenere::Config;
 
 fn main() {
@@ -37,25 +36,11 @@ fn main() {
             process::exit(1);
         }
     };
-    let input_file = match open_input_file(&matches) {
-        Ok(f) => f,
-        Err(e) => {
-            eprintln!("ERROR: {}", e.to_string());
-            process::exit(1);
-        }
-    };
-    let output_file = match create_output_file(&matches) {
-        Ok(f) => f,
-        Err(e) => {
-            eprintln!("ERROR: {}", e.to_string());
-            process::exit(1);
-        }
-    };
 
     let config = Config {
         keyword,
-        input_file,
-        output_file,
+        source: get_source(&matches),
+        sink: get_sink(&matches),
         decipher: matches.opt_present("d"),
     };
 
@@ -69,24 +54,26 @@ fn main() {
     };
 }
 
-/// Opens a file for input
-fn open_input_file(matches: &Matches) -> io::Result<File> {
+/// Opens a file for input, or connects to STDIN
+fn get_source(matches: &Matches) -> Box<io::Read> {
     match matches.opt_str("i") {
-        None => Err(io::Error::new(io::ErrorKind::InvalidInput, "Input file path must be specified")),
-        Some(path) => File::open(path),
+        None => Box::new(io::stdin()) as Box<io::Read>,
+        Some(path) => Box::new(File::open(path).expect("Failed to open input file")) as Box<io::Read>,
     }
 }
 
-/// Creates or truncates (if exists already) a file for output
-fn create_output_file(matches: &Matches) -> io::Result<File> {
+/// Creates or truncates (if exists already) a file for output,
+/// or connects to STDOUT
+fn get_sink(matches: &Matches) -> Box<io::Write> {
     match matches.opt_str("o") {
-        None => Err(io::Error::new(io::ErrorKind::InvalidInput, "Output file path must be specified")),
-        Some(path) => File::create(path),
+        None => Box::new(io::stdout()) as Box<io::Write>,
+        Some(path) => Box::new(File::create(path).expect("Failed to open output file")) as Box<io::Write>,
     }
 }
 
 /// Generates usage information string out of options object
 fn generate_usage(opts: &Options) -> String {
-    let brief = "USAGE: vigenere --key STRING --input FILE --output FILE [--decipher]";
+    let brief = "USAGE: vigenere --key STRING [--input FILE] [--output FILE] [--decipher]
+\nOr just pipe text to the program to get (un)ciphered text to STDOUT.";
     opts.usage(&brief)
 }
