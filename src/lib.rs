@@ -2,6 +2,7 @@ use std::io::{BufReader, BufRead, BufWriter, Read, Write};
 
 const CAP_A: u8 = 65;
 const CAP_Z: u8 = 90;
+const NUM_LETTERS: u8 = 26;
 
 pub struct Config<A: Read, B: Write> {
     pub keyword: String,
@@ -34,7 +35,7 @@ pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
                 }
 
                 let key = key_iter.next().unwrap();
-                (byte + 26u8 - key) % 26u8 + CAP_A
+                (byte + NUM_LETTERS - key) % NUM_LETTERS + CAP_A
             }).collect::<Vec<u8>>()
         }
         else {
@@ -44,7 +45,7 @@ pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
                 }
 
                 let key = key_iter.next().unwrap();
-                (byte + key) % 26u8 + CAP_A
+                (byte + key) % NUM_LETTERS + CAP_A
             }).collect::<Vec<u8>>()
         };
 
