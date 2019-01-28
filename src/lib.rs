@@ -1,5 +1,8 @@
 use std::io::{BufReader, BufRead, BufWriter, Read, Write};
 
+const CAP_A: u8 = 65;
+const CAP_Z: u8 = 90;
+
 pub struct Config<A: Read, B: Write> {
     pub keyword: String,
     pub source: A,
@@ -26,22 +29,22 @@ pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
 
         let mut crypted = if do_decipher {
             line_bytes.map(|byte| {
-                if *byte < 65u8 || *byte > 90u8 {
+                if *byte < CAP_A || *byte > CAP_Z {
                     return *byte;
                 }
 
                 let key = key_iter.next().unwrap();
-                (byte + 26u8 - key) % 26u8 + 65u8
+                (byte + 26u8 - key) % 26u8 + CAP_A
             }).collect::<Vec<u8>>()
         }
         else {
             line_bytes.map(|byte| {
-                if *byte < 65u8 || *byte > 90u8 {
+                if *byte < CAP_A || *byte > CAP_Z {
                     return *byte;
                 }
 
                 let key = key_iter.next().unwrap();
-                (byte + key) % 26u8 + 65u8
+                (byte + key) % 26u8 + CAP_A
             }).collect::<Vec<u8>>()
         };
 
