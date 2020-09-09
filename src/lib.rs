@@ -1,7 +1,7 @@
 use std::io::{BufReader, BufRead, BufWriter, Read, Write};
 
-const CAP_A: u8 = 65;
-const CAP_Z: u8 = 90;
+const CAP_A: u8 = b'A';
+const CAP_Z: u8 = b'Z';
 const NUM_LETTERS: u8 = 26;
 
 pub struct Config<A: Read, B: Write> {
