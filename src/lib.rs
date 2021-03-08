@@ -12,13 +12,13 @@ pub struct Config<A: Read, B: Write> {
 }
 
 pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
-    // Create cyclic iterator over keyword characters
-    let key = config.keyword.to_ascii_uppercase();
-    let input = BufReader::new(config.source);
-    let do_decipher = config.decipher;
+    // Unpack the struct
+    let Config { keyword, source, sink, decipher } = config;
 
-    let mut output = BufWriter::new(config.sink);
-    let mut key_iter = key.as_bytes().into_iter().cycle();
+    let key_uppercase = keyword.to_ascii_uppercase();
+    let input = BufReader::new(source);
+    let mut output = BufWriter::new(sink);
+    let mut key_iter = key_uppercase.as_bytes().into_iter().cycle();
 
     for line in input.lines() {
         let line = match line {
@@ -28,26 +28,19 @@ pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
 
         let line_bytes = line.as_bytes().into_iter();
 
-        let mut crypted = if do_decipher {
-            line_bytes.map(|byte| {
-                if *byte < CAP_A || *byte > CAP_Z {
-                    return *byte;
-                }
+        let mut crypted = line_bytes.map(|byte| {
+            if *byte < CAP_A || *byte > CAP_Z {
+                return *byte;
+            }
 
-                let key = key_iter.next().unwrap();
-                (byte + NUM_LETTERS - key) % NUM_LETTERS + CAP_A
-            }).collect::<Vec<u8>>()
-        }
-        else {
-            line_bytes.map(|byte| {
-                if *byte < CAP_A || *byte > CAP_Z {
-                    return *byte;
-                }
+            let key_letter = key_iter.next().expect("Unexpected end of cyclic keyword iterator?");
 
-                let key = key_iter.next().unwrap();
-                (byte + key) % NUM_LETTERS + CAP_A
-            }).collect::<Vec<u8>>()
-        };
+            if decipher {
+                (byte + NUM_LETTERS - key_letter) % NUM_LETTERS + CAP_A
+            } else {
+                (byte + key_letter) % NUM_LETTERS + CAP_A
+            }
+        }).collect::<Vec<u8>>();
 
         // Push new line
         crypted.push(0x0A);
