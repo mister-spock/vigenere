@@ -4,13 +4,21 @@ const CAP_A: u8 = b'A';
 const CAP_Z: u8 = b'Z';
 const NUM_LETTERS: u8 = 26;
 
+/// Configuration object that has to be passed to the `run` function
 pub struct Config<A: Read, B: Write> {
+    /// Cipher keyword
     pub keyword: String,
+    /// Source of the ciphertext (or plaintext). A file, an input stream, etc.
     pub source: A,
+    /// Sink for the ciphered or deciphered text. A file, an output stream, etc.
     pub sink: B,
+    /// If `true` will attempt a decipher, applies cipher otherwise
     pub decipher: bool,
 }
 
+/// Implements ciphering and deciphering logic. Depending on the given `Config` struct will perform either,
+/// reading from the `source` and writing to the `sink`. Returns unit in case of success, or error string
+/// in case of an error.
 pub fn run(config: Config<impl Read, impl Write>) -> Result<(), String> {
     // Unpack the struct
     let Config { keyword, source, sink, decipher } = config;
