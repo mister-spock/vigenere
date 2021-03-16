@@ -37,10 +37,13 @@ fn main() {
         }
     };
 
+    let mut source = get_source(&matches);
+    let mut sink = get_sink(&matches);
+    
     let config = Config {
         keyword,
-        source: get_source(&matches),
-        sink: get_sink(&matches),
+        source: &mut source,
+        sink: &mut sink,
         decipher: matches.opt_present("d"),
     };
 
@@ -57,8 +60,8 @@ fn main() {
 /// Opens a file for input, or connects to STDIN
 fn get_source(matches: &Matches) -> Box<dyn io::Read> {
     match matches.opt_str("i") {
-        None => Box::new(io::stdin()) as Box<dyn io::Read>,
-        Some(path) => Box::new(File::open(path).expect("Failed to open input file")) as Box<dyn io::Read>,
+        None => Box::new(io::stdin()),
+        Some(path) => Box::new(File::open(path).expect("Failed to open input file")),
     }
 }
 
@@ -66,8 +69,8 @@ fn get_source(matches: &Matches) -> Box<dyn io::Read> {
 /// or connects to STDOUT
 fn get_sink(matches: &Matches) -> Box<dyn io::Write> {
     match matches.opt_str("o") {
-        None => Box::new(io::stdout()) as Box<dyn io::Write>,
-        Some(path) => Box::new(File::create(path).expect("Failed to open output file")) as Box<dyn io::Write>,
+        None => Box::new(io::stdout()),
+        Some(path) => Box::new(File::create(path).expect("Failed to open output file")),
     }
 }
 
